@@ -17,19 +17,15 @@ package podpresetbinding
 
 import (
 	"context"
-	"log"
-	"reflect"
 
 	podpresetv1alpha1 "github.com/jpeeler/podpresetbinding-crd/pkg/apis/podpreset/v1alpha1"
+	servicecatalogv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -109,57 +105,39 @@ func (r *ReconcilePodPresetBinding) Reconcile(request reconcile.Request) (reconc
 		return reconcile.Result{}, err
 	}
 
-	// TODO(user): Change this to be the object type created by your controller
-	// Define the desired Deployment object
-	deploy := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name + "-deployment",
-			Namespace: instance.Namespace,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{"deployment": instance.Name + "-deployment"},
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"deployment": instance.Name + "-deployment"}},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  "nginx",
-							Image: "nginx",
-						},
-					},
-				},
-			},
-		},
-	}
-	if err := controllerutil.SetControllerReference(instance, deploy, r.scheme); err != nil {
+	// Fetch the referenced ServiceBinding
+	binding := &servicecatalogv1beta1.ServiceBinding{}
+	err = r.Get(context.TODO(), types.NamespacedName{Name: instance.Spec.BindingRef.Name, Namespace: instance.Namespace}, binding)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Object not found, return.  Created objects are automatically garbage collected.
+			// For additional cleanup logic use finalizers.
+			return reconcile.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
 
-	// TODO(user): Change this for the object type created by your controller
-	// Check if the Deployment already exists
-	found := &appsv1.Deployment{}
-	err = r.Get(context.TODO(), types.NamespacedName{Name: deploy.Name, Namespace: deploy.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		log.Printf("Creating Deployment %s/%s\n", deploy.Namespace, deploy.Name)
-		err = r.Create(context.TODO(), deploy)
-		if err != nil {
+	if len(binding.Status.Conditions) > 0 && binding.Status.Conditions[len(binding.Status.Conditions)-1].Type == servicecatalogv1beta1.ServiceBindingConditionReady {
+		// create pod preset if binding status is ready
+		//podPresetName := fmt.Sprintf("preset-for-%v", instance.Spec.BindingRef.Name) // TODO: this probably needs to be generated with a non-conflicting name
+		// newPodPreset := settingsv1alpha1.PodPreset{
+		// 	ObjectMeta: metav1.ObjectMeta{
+		// 		Name:      podPresetName,
+		// 		Namespace: instance.Namespace,
+		// 	},
+		// 	Spec: instance.Spec.PodPresetTemplate,
+		// }
+		newPodPreset := instance.Spec.PodPresetTemplate
+		if err := r.Create(context.TODO(), &newPodPreset); err != nil {
 			return reconcile.Result{}, err
 		}
-	} else if err != nil {
-		return reconcile.Result{}, err
+
+		// perhaps unnecessary
+		// if err := controllerutil.SetControllerReference(instance, newPodPreset, r.scheme); err != nil {
+		// 	return reconcile.Result{}, err
+		// }
 	}
 
-	// TODO(user): Change this for the object type created by your controller
-	// Update the found object and write the result back if there are any changes
-	if !reflect.DeepEqual(deploy.Spec, found.Spec) {
-		found.Spec = deploy.Spec
-		log.Printf("Updating Deployment %s/%s\n", deploy.Namespace, deploy.Name)
-		err = r.Update(context.TODO(), found)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
-	}
 	return reconcile.Result{}, nil
 }
