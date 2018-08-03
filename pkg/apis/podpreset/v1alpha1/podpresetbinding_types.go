@@ -16,6 +16,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/jpeeler/podpreset-crd/pkg/apis/settings/v1alpha1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -26,6 +28,10 @@ import (
 type PodPresetBindingSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	BindingRef        *v1.ObjectReference `json:"bindingRef,omitempty"`
+	PodPresetTemplate v1alpha1.PodPreset  `json:"podPresetTemplate"`
 }
 
 // PodPresetBindingStatus defines the observed state of PodPresetBinding
