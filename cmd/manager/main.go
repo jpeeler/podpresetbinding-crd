@@ -16,10 +16,13 @@ limitations under the License.
 package main
 
 import (
+	"flag"
 	"log"
 
+	"github.com/golang/glog"
 	"github.com/jpeeler/podpresetbinding-crd/pkg/apis"
 	"github.com/jpeeler/podpresetbinding-crd/pkg/controller"
+	//servicecataloginstall "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/install"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -27,6 +30,8 @@ import (
 )
 
 func main() {
+	flag.Parse()
+	glog.V(6).Infof("JPEELER online")
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {
@@ -45,6 +50,7 @@ func main() {
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Fatal(err)
 	}
+	//servicecataloginstall.Install(mgr.GetScheme())
 
 	// Setup all Controllers
 	if err := controller.AddToManager(mgr); err != nil {

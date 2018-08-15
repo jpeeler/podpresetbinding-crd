@@ -17,7 +17,9 @@ package podpresetbinding
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/golang/glog"
 	podpresetv1alpha1 "github.com/jpeeler/podpresetbinding-crd/pkg/apis/podpreset/v1alpha1"
 	servicecatalogv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -92,6 +94,7 @@ type ReconcilePodPresetBinding struct {
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=podpreset.svcat.k8s.io,resources=podpresetbindings,verbs=get;list;watch;create;update;patch;delete
 func (r *ReconcilePodPresetBinding) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	glog.V(6).Infof("Entering reconcile: %#v", request)
 	// Fetch the PodPresetBinding instance
 	instance := &podpresetv1alpha1.PodPresetBinding{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
@@ -107,17 +110,26 @@ func (r *ReconcilePodPresetBinding) Reconcile(request reconcile.Request) (reconc
 
 	// Fetch the referenced ServiceBinding
 	binding := &servicecatalogv1beta1.ServiceBinding{}
+	glog.V(6).Infof("Instance %#v\n", instance)
+	if instance.Spec.BindingRef == nil {
+		glog.V(6).Infof("BindingRef was nil, bailing\n")
+		return reconcile.Result{}, fmt.Errorf("spec for instance '%v' did not contain bindingref", instance)
+	}
 	err = r.Get(context.TODO(), types.NamespacedName{Name: instance.Spec.BindingRef.Name, Namespace: instance.Namespace}, binding)
+	glog.V(6).Infof("Got: %#v binding:%#v", err, binding)
+	// JPEELER HERE
+	// above is reporting:
+	// I0803 17:48:25.061369   15904 podpresetbinding_controller.go:114] JPEELER get: &runtime.notRegisteredErr{gvk:schema.GroupVersionKind{Group:"", Version:"", Kind:""}, target:runtime.GroupVersioner(nil), t:(*reflect.rtype)(0x108f960)} binding:&v1beta1.ServiceBinding{TypeMeta:v1.TypeMeta{Kind:"", APIVersion:""}, ObjectMeta:v1.ObjectMeta{Name:"", GenerateName:"", Namespace:"", SelfLink:"", UID:"", ResourceVersion:"", Generation:0, CreationTimestamp:v1.Time{Time:time.Time{wall:0x0, ext:0, loc:(*time.Location)(nil)}}, DeletionTimestamp:(*v1.Time)(nil), DeletionGracePeriodSeconds:(*int64)(nil), Labels:map[string]string(nil), Annotations:map[string]string(nil), OwnerReferences:[]v1.OwnerReference(nil), Initializers:(*v1.Initializers)(nil), Finalizers:[]string(nil), ClusterName:""}, Spec:v1beta1.ServiceBindingSpec{ServiceInstanceRef:v1beta1.LocalObjectReference{Name:""}, Parameters:(*runtime.RawExtension)(nil), ParametersFrom:[]v1beta1.ParametersFromSource(nil), SecretName:"", SecretTransforms:[]v1beta1.SecretTransform(nil), ExternalID:"", UserInfo:(*v1beta1.UserInfo)(nil)}, Status:v1beta1.ServiceBindingStatus{Conditions:[]v1beta1.ServiceBindingCondition(nil), AsyncOpInProgress:false, LastOperation:(*string)(nil), CurrentOperation:"", ReconciledGeneration:0, OperationStartTime:(*v1.Time)(nil), InProgressProperties:(*v1beta1.ServiceBindingPropertiesState)(nil), ExternalProperties:(*v1beta1.ServiceBindingPropertiesState)(nil), OrphanMitigationInProgress:false, UnbindStatus:""}} ^C2018/08/03 17:49:01 <nil>
+
 	if err != nil {
 		if errors.IsNotFound(err) {
-			// Object not found, return.  Created objects are automatically garbage collected.
-			// For additional cleanup logic use finalizers.
-			return reconcile.Result{}, nil
+			glog.V(6).Infof("Binding '%v' not found, requeuing", binding.Name)
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
 
+	glog.V(6).Infof("Looking at binding %+v\n", binding)
 	if len(binding.Status.Conditions) > 0 && binding.Status.Conditions[len(binding.Status.Conditions)-1].Type == servicecatalogv1beta1.ServiceBindingConditionReady {
 		// create pod preset if binding status is ready
 		//podPresetName := fmt.Sprintf("preset-for-%v", instance.Spec.BindingRef.Name) // TODO: this probably needs to be generated with a non-conflicting name
@@ -128,6 +140,7 @@ func (r *ReconcilePodPresetBinding) Reconcile(request reconcile.Request) (reconc
 		// 	},
 		// 	Spec: instance.Spec.PodPresetTemplate,
 		// }
+		glog.V(6).Infof("Binding '%v' ready, attempting to create pod preset\n", binding.Name)
 		newPodPreset := instance.Spec.PodPresetTemplate
 		if err := r.Create(context.TODO(), &newPodPreset); err != nil {
 			return reconcile.Result{}, err

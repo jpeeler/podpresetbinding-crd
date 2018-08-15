@@ -24,6 +24,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	//servicecatalogv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/scheme"
 )
@@ -34,4 +35,10 @@ var (
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
+
+	//var CatalogSchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1beta1"}
+	// CatalogSchemeBuilder is used to add catalog types
+	//CatalogSchemeBuilder = &servicecatalogv1beta1.SchemeBuilder
+	//CatalogSchemeBuilder = &scheme.Builder{GroupVersion: servicecatalogv1beta1.SchemeGroupVersion}
+	//CatalogSchemeBuilder = &scheme.Builder{GroupVersion: servicecatalogv1beta1.SchemeGroupVersion}
 )
