@@ -134,10 +134,22 @@
   version = "v1.2.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/jpeeler/podpreset-crd"
+  packages = ["pkg/apis/settings"]
+  revision = "4d6e1a45dd59ac149a171f43dc1499d3ee4901a8"
+
+[[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
   revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
   version = "1.1.4"
+
+[[projects]]
+  name = "github.com/kubernetes-incubator/service-catalog"
+  packages = ["pkg/apis/servicecatalog"]
+  revision = "44182ac234fdf184a5dcca63d01c9f67a56c4e75"
+  version = "v0.1.29"
 
 [[projects]]
   name = "github.com/markbates/inflect"
@@ -413,7 +425,10 @@
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
-    "pkg/apis/apiextensions/v1beta1"
+    "pkg/apis/apiextensions/v1beta1",
+    "pkg/client/clientset/clientset",
+    "pkg/client/clientset/clientset/scheme",
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
   ]
   revision = "4347b330d0ff094db860f2f75fa725b4f4b53618"
   version = "kubernetes-1.10.1"
@@ -569,6 +584,8 @@
     "pkg/client/apiutil",
     "pkg/client/config",
     "pkg/controller",
+    "pkg/controller/controllerutil",
+    "pkg/envtest",
     "pkg/event",
     "pkg/handler",
     "pkg/internal/controller",
@@ -579,6 +596,7 @@
     "pkg/recorder",
     "pkg/runtime/inject",
     "pkg/runtime/log",
+    "pkg/runtime/scheme",
     "pkg/runtime/signals",
     "pkg/source",
     "pkg/source/internal"
@@ -610,6 +628,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bfdfdcd42937389241e9c76decc23658d29e0916f3e9fa2c6e4fac3bbd648ff5"
+  inputs-digest = "8e45fa7504da65d275957a5a72d60e5b6345646800fa74478bbebf2480bab20f"
   solver-name = "gps-cdcl"
   solver-version = 1
