@@ -136,7 +136,10 @@
 [[projects]]
   branch = "master"
   name = "github.com/jpeeler/podpreset-crd"
-  packages = ["pkg/apis/settings"]
+  packages = [
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1"
+  ]
   revision = "4d6e1a45dd59ac149a171f43dc1499d3ee4901a8"
 
 [[projects]]
@@ -615,7 +618,7 @@
     "pkg/internal/codegen/parse",
     "pkg/util"
   ]
-  revision = "4642040bdc8d31340218c0b36ae6c3779caad0b4"
+  revision = "9e93ac1acf783f32460f055c71e810360d4cf84f"
 
 [[projects]]
   name = "sigs.k8s.io/testing_frameworks"
@@ -628,6 +631,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8e45fa7504da65d275957a5a72d60e5b6345646800fa74478bbebf2480bab20f"
+  inputs-digest = "9684e1e2beeef4682196ce7a2d0d723e4a720f58dc579d088cf36fb2970385fc"
   solver-name = "gps-cdcl"
   solver-version = 1
