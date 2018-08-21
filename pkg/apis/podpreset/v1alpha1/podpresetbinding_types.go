@@ -17,7 +17,8 @@ package v1alpha1
 
 import (
 	"github.com/jpeeler/podpreset-crd/pkg/apis/settings/v1alpha1"
-	//servicecatalogv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	podpresetv1alpha1 "github.com/jpeeler/podpreset-crd/pkg/apis/settings/v1alpha1"
+	servicecatalogv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -65,6 +66,6 @@ type PodPresetBindingList struct {
 
 func init() {
 	SchemeBuilder.Register(&PodPresetBinding{}, &PodPresetBindingList{})
-
-	//CatalogSchemeBuilder.Register(&servicecatalogv1beta1.ServiceBinding{})
+	CatalogSchemeBuilder.Register(&servicecatalogv1beta1.ServiceBinding{}, &servicecatalogv1beta1.ServiceBindingList{})
+	PodPresetSchemeBuilder.Register(&podpresetv1alpha1.PodPreset{}, &podpresetv1alpha1.PodPresetList{})
 }
