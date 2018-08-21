@@ -120,9 +120,6 @@ func (r *ReconcilePodPresetBinding) Reconcile(request reconcile.Request) (reconc
 	}
 	err = r.Get(context.TODO(), types.NamespacedName{Name: instance.Spec.BindingRef.Name, Namespace: instance.Namespace}, binding)
 	glog.V(6).Infof("Got: %#v binding:%#v", err, binding)
-	// JPEELER HERE
-	// above is reporting:
-	// I0803 17:48:25.061369   15904 podpresetbinding_controller.go:114] JPEELER get: &runtime.notRegisteredErr{gvk:schema.GroupVersionKind{Group:"", Version:"", Kind:""}, target:runtime.GroupVersioner(nil), t:(*reflect.rtype)(0x108f960)} binding:&v1beta1.ServiceBinding{TypeMeta:v1.TypeMeta{Kind:"", APIVersion:""}, ObjectMeta:v1.ObjectMeta{Name:"", GenerateName:"", Namespace:"", SelfLink:"", UID:"", ResourceVersion:"", Generation:0, CreationTimestamp:v1.Time{Time:time.Time{wall:0x0, ext:0, loc:(*time.Location)(nil)}}, DeletionTimestamp:(*v1.Time)(nil), DeletionGracePeriodSeconds:(*int64)(nil), Labels:map[string]string(nil), Annotations:map[string]string(nil), OwnerReferences:[]v1.OwnerReference(nil), Initializers:(*v1.Initializers)(nil), Finalizers:[]string(nil), ClusterName:""}, Spec:v1beta1.ServiceBindingSpec{ServiceInstanceRef:v1beta1.LocalObjectReference{Name:""}, Parameters:(*runtime.RawExtension)(nil), ParametersFrom:[]v1beta1.ParametersFromSource(nil), SecretName:"", SecretTransforms:[]v1beta1.SecretTransform(nil), ExternalID:"", UserInfo:(*v1beta1.UserInfo)(nil)}, Status:v1beta1.ServiceBindingStatus{Conditions:[]v1beta1.ServiceBindingCondition(nil), AsyncOpInProgress:false, LastOperation:(*string)(nil), CurrentOperation:"", ReconciledGeneration:0, OperationStartTime:(*v1.Time)(nil), InProgressProperties:(*v1beta1.ServiceBindingPropertiesState)(nil), ExternalProperties:(*v1beta1.ServiceBindingPropertiesState)(nil), OrphanMitigationInProgress:false, UnbindStatus:""}} ^C2018/08/03 17:49:01 <nil>
 
 	if err != nil {
 		if errors.IsNotFound(err) {

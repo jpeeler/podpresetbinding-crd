@@ -30,7 +30,7 @@ import (
 
 func main() {
 	flag.Parse()
-	glog.V(6).Infof("JPEELER online")
+	glog.V(6).Infof("Starting main")
 	// Get a config to talk to the apiserver
 	cfg, err := config.GetConfig()
 	if err != nil {
