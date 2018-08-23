@@ -16,6 +16,9 @@ manager: generate fmt vet
 run: generate fmt vet
 	go run ./cmd/manager/main.go
 
+run-debug:
+	go run ./cmd/manager/main.go -v=6 -alsologtostderr
+
 # Install CRDs into a cluster
 install: manifests
 	kubectl apply -f config/crds
