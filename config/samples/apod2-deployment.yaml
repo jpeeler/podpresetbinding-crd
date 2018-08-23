@@ -27,3 +27,4 @@ spec:
         args:
         - sleep
         - "86400"
+      terminationGracePeriodSeconds: 1
