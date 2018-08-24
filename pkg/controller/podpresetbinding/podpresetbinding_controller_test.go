@@ -20,6 +20,7 @@ import (
 	"time"
 
 	podpresetv1alpha1 "github.com/jpeeler/podpresetbinding-crd/pkg/apis/podpreset/v1alpha1"
+	servicecatalogv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	//servicecatalogv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/onsi/gomega"
 	"golang.org/x/net/context"
@@ -66,10 +67,14 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 }
 
-// This test won't work correctly until the catalog apiserver is run with the k8s apiserver
-func DisabledTestReconcileWithBindingRef(t *testing.T) {
+func TestReconcileWithBindingRef(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	//binding := &servicecatalogv1beta1.ServiceBinding{ObjectMeta: metav1.ObjectMeta{Name: "test-binding", Namespace: "default"}}
+
+	// create binding
+	binding := &servicecatalogv1beta1.ServiceBinding{ObjectMeta: metav1.ObjectMeta{Name: "test-binding", Namespace: "default"}}
+	err := c.Create(context.TODO(), binding)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	instance := &podpresetv1alpha1.PodPresetBinding{
 		ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "default"},
 		Spec: podpresetv1alpha1.PodPresetBindingSpec{
